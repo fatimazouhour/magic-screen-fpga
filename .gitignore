@@ -10,10 +10,12 @@ vsim.wlf
 *.qpf
 *.qsf
 *.qws
-
+*.sdc
 
 .DS_Store
 Thumbs.db
 
-telecran/
+
 work/
+pll/
+i2c/
