@@ -14,6 +14,9 @@ architecture uut of encoder_tb is
     constant c_period : time := 20 ns;
 begin
     uut : entity work.encoder
+        generic map(
+            div =>1
+        )
         port map (
             i_clk   => s_clk,
             i_rst_n => s_rst_n,
