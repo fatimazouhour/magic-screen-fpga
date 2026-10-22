@@ -1,21 +1,17 @@
 db/
 incremental_db/
 output_files/
+c5_pin_model_pump.txt
 
 transcript
 vsim.wlf
 
 *.tmp
 *.bak
-*.qpf
-*.qsf
 *.qws
-*.sdc
+
 
 .DS_Store
 Thumbs.db
 
-
 work/
-pll/
-i2c/
