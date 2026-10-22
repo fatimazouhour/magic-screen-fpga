@@ -1,7 +1,7 @@
 db/
 incremental_db/
 output_files/
-c5_pin_model_pump.txt
+c5_pin_model_dump.txt
 
 transcript
 vsim.wlf
