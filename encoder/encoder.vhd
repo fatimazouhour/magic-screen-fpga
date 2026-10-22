@@ -4,7 +4,8 @@ use ieee.numeric_std.all;
 
 entity encoder is  
     generic(
-        reg_size : positive := 10--register size
+        reg_size : positive := 10;--register size
+        div: positive :=27000 -- added this to try to eliminate pulses
     );
 
     port (
@@ -24,6 +25,10 @@ architecture rtl of encoder is
     signal r_B_sync: std_logic_vector(1 downto 0) := (others =>'0');
 
     signal r_cnt: unsigned(reg_size-1 downto 0);
+
+    signal r_div: natural range 0 to div-1 :=0;
+    signal r_tick: std_logic := '0';
+
 begin
     process(i_clk, i_rst_n)
     begin
@@ -34,6 +39,9 @@ begin
             r_A_sync <= (others => '0');
             r_B_sync <= (others => '0');
 
+            --reseting
+            r_div <= 0;
+            r_tick <= '0';
             r_cnt <= (others => '0');
 
         elsif rising_edge(i_clk) then
@@ -41,23 +49,32 @@ begin
             r_A_sync <= r_A_sync(0) & i_A;
             r_B_sync <= r_B_sync(0) & i_B;
 
-            if ((r_A = '0' and r_A_sync(1) ='1') and r_B_sync(1)= '0') or 
-                ((r_A='1' and r_A_sync(1)='0') and r_B_sync(1)='1') then
-
-                r_cnt <= r_cnt + 1; --increment 
-
-            elsif ((r_B='0' and r_B_sync(1)='1') and r_A_sync(1)='0') or 
-                ((r_B='1' and r_B_sync='0') and r_A_sync(1)='1') then
-
-                r_cnt <= r_cnt - 1; --decrement
-
+            if r_div = div-1 then
+                r_div <= 0;
+                r_tick <= '1';
+            else
+                r_div <= r_div + 1;
+                r_tick <= '0';
             end if;
+            
+            if r_tick= '1' then
+                if ((r_A = '0' and r_A_sync(1) ='1') and r_B_sync(1)= '0') or 
+                    ((r_A='1' and r_A_sync(1)='0') and r_B_sync(1)='1') then
+
+                    r_cnt <= r_cnt + 1; --increment 
+
+                elsif ((r_B='0' and r_B_sync(1)='1') and r_A_sync(1)='0') or 
+                    ((r_B='1' and r_B_sync(1)='0') and r_A_sync(1)='1') then
+
+                    r_cnt <= r_cnt - 1; --decrement
+
+                end if;
 
             r_A <= r_A_sync(1);
             r_B <= r_B_sync(1);
-
         end if;
-    end process;
+    end if;
+end process;
 
     o_cnt <= r_cnt;
 
