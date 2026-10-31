@@ -1,0 +1,9 @@
+# Normalize line endings
+* text=auto
+
+# Binary files
+*.png binary
+
+telecran/pll/** linguist-generated
+
+telecran/i2c/** linguist-vendored
