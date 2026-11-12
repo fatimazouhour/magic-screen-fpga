@@ -7,7 +7,9 @@ The left knob moves the stylus horizontally and the right knob vertically. The d
 
 ## Demo
 
-https://github.com/user-attachments/assets/ddaaf15e-1703-47d7-8633-5253588c83d5
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/ddaaf15e-1703-47d7-8633-5253588c83d5" controls width="400"></video>
+</p>
 
 *Some latency is visible. It most likely comes from the HDMI-to-USB capture adapter,
 not from the design.*
