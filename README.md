@@ -6,10 +6,14 @@ The left knob moves the stylus horizontally and the right knob vertically. The d
 720×480 HDMI picture, and holding the left knob's button erases it.
 
 ## Demo
+<div align="center">
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/19dcbe9c-51c7-4a61-b88f-d377f86a3a85" controls width="400"></video>
-</p>
+
+https://github.com/user-attachments/assets/a841c58d-8945-41f5-87db-b64cb387ce98
+
+
+
+</div>
 
 *Some latency is visible. It most likely comes from the HDMI-to-USB capture adapter,
 not from the design.*
