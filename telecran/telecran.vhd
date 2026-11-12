@@ -67,7 +67,21 @@ architecture rtl of telecran is
 
 	signal s_x_counter : natural range 0 to h_res-1; --for hdmi
 	signal s_y_counter : natural range 0 to v_res-1;
+
+	signal s_pixel_address: natural range 0 to h_res*v_res-1;
 	
+	--for the RAM:
+	signal s_wr_addr : natural range 0 to h_res*v_res-1;
+	signal s_wr_data : std_logic;
+	signal s_rd_data: std_logic;
+	signal s_wr_we   : std_logic;
+	signal s_cursor_on_screen: std_logic;
+
+	--eraser
+	signal s_erasing : std_logic;
+	signal s_erase_addr: natural range 0 to h_res*v_res-1;
+	signal r_clear_done : std_logic;
+	signal r_pb_sync : std_logic_vector(1 downto 0);  
 begin
 	--o_leds <= (others => '0');
 	--o_de10_leds <= (others => '0');
@@ -117,15 +131,75 @@ begin
 			o_hdmi_vs => o_hdmi_tx_vs,
 			o_hdmi_de  => o_hdmi_tx_de,
 			o_pixel_en  => open,
-			o_pixel_address => open,
+			o_pixel_address => s_pixel_address,
 			o_x_counter => s_x_counter,
 			o_y_counter => s_y_counter
 		);	
 	o_hdmi_tx_clk <= s_clk_27;
-	o_hdmi_tx_d(23 downto 16) <= std_logic_vector(to_unsigned(s_x_counter, 8));
-	o_hdmi_tx_d(15 downto 8)  <= std_logic_vector(to_unsigned(s_y_counter, 8));
-	o_hdmi_tx_d(7 downto 0)   <= (others => '0');
 
+	-- comment test pixel code
+
+	--o_hdmi_tx_d(23 downto 16) <= std_logic_vector(to_unsigned(s_x_counter, 8));
+	--o_hdmi_tx_d(15 downto 8)  <= std_logic_vector(to_unsigned(s_y_counter, 8));
+	--o_hdmi_tx_d(7 downto 0)   <= (others => '0');
+
+	-- moving a pixel 
+	--process(s_x_counter, s_y_counter, s_left_cnt, s_right_cnt)
+	--begin
+	--	if (s_x_counter = to_integer(s_left_cnt)) and (s_y_counter = to_integer(s_right_cnt)) then
+	--		o_hdmi_tx_d <= x"FFFFFF"; -- white: the cursor is here
+	--	else
+	--		o_hdmi_tx_d <= x"000000"; -- black
+	--	end if;
+	--end process;
+	
+	--!!!! moving a pixel worked!!!
+
+	-- now for ram
+	dpram0 : entity work.dpram
+		generic map (mem_size => h_res*v_res, data_width => 1)
+		port map(
+			i_clk_a => s_clk_27,
+			i_clk_b =>s_clk_27,
+			i_data_a(0) => s_wr_data,
+			i_addr_a => s_wr_addr,
+			i_we_a => s_wr_we,
+			o_q_a => open,
+			i_data_b => (others => '0'), 
+			i_addr_b => s_pixel_address,
+			i_we_b => '0',
+			o_q_b(0) => s_rd_data
+		);
+		
+	s_cursor_on_screen <= '1' when (to_integer(s_left_cnt) < h_res) and (to_integer(s_right_cnt) < v_res) else '0';
+
+	s_wr_addr <= s_erase_addr when s_erasing = '1' else
+	             to_integer(s_left_cnt) + to_integer(s_right_cnt) * h_res when s_cursor_on_screen = '1' else
+	             0;
+	s_wr_data <= '0' when s_erasing = '1' else '1';
+	s_wr_we   <= '1' when (s_erasing = '1') or (s_cursor_on_screen = '1') else '0';
+
+	o_hdmi_tx_d <= x"FFFFFF" when s_rd_data = '1' else x"000000";
+	
+	process(s_clk_27, s_rst_n)
+	begin
+		if s_rst_n = '0' then
+			s_erase_addr <= 0;
+			r_clear_done <= '0';          -- after KEY0 : erase the whole RAM once
+			r_pb_sync    <= "11";
+		elsif rising_edge(s_clk_27) then
+			r_pb_sync <= r_pb_sync(0) & i_left_pb;
+			if s_erase_addr = h_res*v_res-1 then
+				s_erase_addr <= 0;
+				r_clear_done <= '1';      -- first full turn done
+			else
+				s_erase_addr <= s_erase_addr + 1;
+			end if;
+		end if;
+	end process;
+
+	-- erase while the left button is held ('0' = pressed), or during the first turn after a reset
+	s_erasing <= '1' when (r_pb_sync(1) = '0') or (r_clear_done = '0') else '0';
 	-- Configures the ADV7513 for 480p
 	I2C_HDMI_Config0 : component I2C_HDMI_Config 
 		port map (
