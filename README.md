@@ -42,7 +42,7 @@ encoder/        encoder.vhd, testbench encoder_tb.vhd, ModelSim script encoder.d
 hdmi/           hdmi_controler.vhd (HDMI 480p controller)
 telecran/       telecran.vhd (top level), dpram.vhd, Quartus project, pll/, i2c/
 documentation/  screenshots, RTL view, test videos
-report/         lab report (report.tex, report.pdf)
+report/         lab report
 ```
 
 ## Run it
