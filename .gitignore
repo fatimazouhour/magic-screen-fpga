@@ -15,3 +15,17 @@ vsim.wlf
 Thumbs.db
 
 work/
+
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.tex
+*.synctex.gz
+
+*.fdb_latexmk
+
+documentation/demo_vid_con_eraser_fixed.mp4
+
+ensea_logo.png
